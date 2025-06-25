@@ -21,78 +21,283 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# Time Slot Backend
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A NestJS-based backend application for managing time slots with PostgreSQL database and Prisma ORM.
 
-## Project setup
+## Prerequisites
 
-```bash
-$ yarn install
-```
+Before running this project, ensure you have the following installed on your machine:
 
-## Compile and run the project
+- **Node.js** (v20 or higher) - [Download here](https://nodejs.org/)
+- **Yarn** package manager - [Installation guide](https://yarnpkg.com/getting-started/install)
+- **Docker** and **Docker Compose** - [Download here](https://www.docker.com/products/docker-desktop/)
+- **Git** - [Download here](https://git-scm.com/)
 
-```bash
-# development
-$ yarn run start
+## Quick Start with Docker (Recommended)
 
-# watch mode
-$ yarn run start:dev
+The easiest way to run this project is using Docker, which will set up everything automatically including the PostgreSQL database.
 
-# production mode
-$ yarn run start:prod
-```
-
-## Run tests
+### 1. Clone the repository
 
 ```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+git clone <repository-url>
+cd time-slot-be
 ```
+
+### 2. Start the application with Docker Compose
+
+```bash
+# Start all services (database + application)
+yarn docker:compose:up
+
+# Or using npm
+npm run docker:compose:up
+```
+
+This command will:
+
+- Start a PostgreSQL database container
+- Build and start the NestJS application container
+- Set up the network between containers
+- Run on the following ports:
+  - **Application**: http://localhost:3000
+  - **Database**: localhost:5432
+  - **Prisma Studio** (optional): http://localhost:5555
+
+### 3. Run database migrations
+
+```bash
+# Generate Prisma client and run migrations
+yarn db:setup
+
+# Or using npm
+npm run db:setup
+```
+
+### 4. Verify the setup
+
+- Check if containers are running: `docker ps`
+- View application logs: `yarn docker:compose:logs`
+- Access the API at: http://localhost:3000
+
+## Manual Setup (Without Docker)
+
+If you prefer to run the project without Docker, follow these steps:
+
+### 1. Clone and install dependencies
+
+```bash
+git clone <repository-url>
+cd time-slot-be
+yarn install
+```
+
+### 2. Set up PostgreSQL database
+
+You'll need a PostgreSQL database running locally or remotely. Update the `DATABASE_URL` in your environment:
+
+```bash
+# Create a .env file
+echo "DATABASE_URL=postgresql://username:password@localhost:5432/timeslot_db" > .env
+```
+
+### 3. Set up the database
+
+```bash
+# Generate Prisma client
+yarn prisma:generate
+
+# Run database migrations
+yarn prisma:migrate
+```
+
+### 4. Start the application
+
+```bash
+# Development mode
+yarn start:dev
+
+# Production mode
+yarn start:prod
+```
+
+## Available Scripts
+
+### Development Scripts
+
+```bash
+# Start the application
+yarn start                    # Production mode
+yarn start:dev               # Development mode with hot reload
+yarn start:debug             # Debug mode
+
+# Build the application
+yarn build
+
+# Run tests
+yarn test                    # Unit tests
+yarn test:e2e               # End-to-end tests
+yarn test:cov               # Test coverage
+
+# Code quality
+yarn lint                   # ESLint
+yarn format                 # Prettier formatting
+```
+
+### Database Scripts
+
+```bash
+# Prisma commands
+yarn prisma:generate        # Generate Prisma client
+yarn prisma:migrate         # Run migrations
+yarn prisma:studio          # Open Prisma Studio
+yarn prisma:db:push         # Push schema changes
+yarn prisma:db:seed         # Seed the database
+```
+
+### Docker Scripts
+
+```bash
+# Docker commands
+yarn docker:build           # Build Docker image
+yarn docker:run             # Run container
+yarn docker:compose:up      # Start all services
+yarn docker:compose:down    # Stop all services
+yarn docker:compose:logs    # View logs
+yarn docker:compose:studio  # Start Prisma Studio in Docker
+```
+
+## Project Structure
+
+```
+time-slot-be/
+├── src/                    # Application source code
+│   ├── app.controller.ts   # Main controller
+│   ├── app.service.ts      # Main service
+│   ├── app.module.ts       # Root module
+│   └── main.ts            # Application entry point
+├── prisma/                # Database schema and migrations
+│   └── schema.prisma      # Prisma schema
+├── test/                  # Test files
+├── Dockerfile             # Docker configuration
+├── docker-compose.yml     # Docker Compose services
+└── package.json           # Dependencies and scripts
+```
+
+## Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+# Database
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/timeslot_db
+
+# Application
+NODE_ENV=development
+PORT=3000
+```
+
+## Database Configuration
+
+The application uses PostgreSQL with the following default configuration:
+
+- **Host**: localhost (or `postgres` in Docker)
+- **Port**: 5432
+- **Database**: timeslot_db
+- **Username**: postgres
+- **Password**: postgres
+
+## Troubleshooting
+
+### Common Issues
+
+#### Port Conflicts
+
+If you get port conflicts, modify the ports in `docker-compose.yml`:
+
+- PostgreSQL: Change `5432:5432` to `5433:5432`
+- App: Change `3000:3000` to `3001:3000`
+- Prisma Studio: Change `5555:5555` to `5556:5555`
+
+#### Database Connection Issues
+
+1. Ensure PostgreSQL container is running: `docker ps`
+2. Check logs: `yarn docker:compose:logs`
+3. Verify DATABASE_URL in your `.env` file
+
+#### Docker Issues
+
+```bash
+# Reset everything
+yarn docker:compose:down
+docker volume rm time-slot-be_postgres_data
+yarn docker:compose:up
+```
+
+### Useful Commands
+
+```bash
+# View running containers
+docker ps
+
+# View logs for specific service
+docker-compose logs app
+docker-compose logs postgres
+
+# Access database directly
+docker exec -it time-slot-postgres psql -U postgres -d timeslot_db
+
+# Restart services
+yarn docker:compose:restart
+```
+
+## Development Workflow
+
+1. **Start the development environment**:
+
+   ```bash
+   yarn docker:compose:up
+   ```
+
+2. **Make code changes** - The application will automatically reload in development mode
+
+3. **Run tests**:
+
+   ```bash
+   yarn test
+   ```
+
+4. **Update database schema**:
+
+   ```bash
+   # After modifying prisma/schema.prisma
+   yarn prisma:generate
+   yarn prisma:migrate
+   ```
+
+5. **View database** (optional):
+   ```bash
+   yarn docker:compose:studio
+   # Then visit http://localhost:5555
+   ```
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+For production deployment, the project includes a multi-stage Dockerfile optimized for production builds. See the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
 ## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- **Documentation**: [NestJS Documentation](https://docs.nestjs.com)
+- **Discord**: [NestJS Discord](https://discord.gg/G7Qnnhy)
+- **Issues**: Create an issue in the project repository
+
+## License
+
+This project is licensed under the MIT License.
 
 ## Stay in touch
 
 - Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
 - Website - [https://nestjs.com](https://nestjs.com/)
 - Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
