@@ -25,7 +25,7 @@ services:
     container_name: time-slot-app
     restart: unless-stopped
     ports:
-      - '3000:3000'
+      - '3500:3500'
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/timeslot_db
@@ -37,7 +37,7 @@ services:
       - ./prisma:/app/prisma
       - ./generated:/app/generated
 
-  # Prisma Studio (optional - for database management)
+  # Prisma Studio for database management
   prisma-studio:
     build:
       context: .
