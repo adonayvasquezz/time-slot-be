@@ -8,7 +8,9 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -22,17 +24,24 @@ export class EventsController {
   @Post()
   create(
     @Body(ParseDatePipe, StripUndefinedPipe) createEventDto: CreateEventDto,
+    @Req() req: Request,
   ) {
+    console.log('POST /events access token:', req.headers['authorization']);
     return this.eventsService.create(createEventDto);
   }
 
   @Get()
-  findAll() {
+  findAll(@Req() req: Request) {
+    console.log('GET /events access token:', req.headers['authorization']);
     return this.eventsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Req() req: Request) {
+    console.log(
+      `GET /events/${id} access token:`,
+      req.headers['authorization'],
+    );
     return this.eventsService.findOne(id);
   }
 
@@ -40,13 +49,22 @@ export class EventsController {
   update(
     @Param('id') id: string,
     @Body(ParseDatePipe, StripUndefinedPipe) updateEventDto: UpdateEventDto,
+    @Req() req: Request,
   ) {
+    console.log(
+      `PATCH /events/${id} access token:`,
+      req.headers['authorization'],
+    );
     return this.eventsService.update(id, updateEventDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string, @Req() req: Request) {
+    console.log(
+      `DELETE /events/${id} access token:`,
+      req.headers['authorization'],
+    );
     return this.eventsService.remove(id);
   }
 }

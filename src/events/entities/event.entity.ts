@@ -5,6 +5,7 @@ export class Event {
   date: Date;
   startTime: Date;
   endTime: Date;
+  googleCalendarEventId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
