@@ -11,12 +11,7 @@ export class EventRepository implements IEventRepository {
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
     return this.prisma.event.create({
-      data: {
-        ...createEventDto,
-        date: new Date(createEventDto.date),
-        startTime: new Date(createEventDto.startTime),
-        endTime: new Date(createEventDto.endTime),
-      },
+      data: createEventDto,
     });
   }
 
@@ -40,19 +35,10 @@ export class EventRepository implements IEventRepository {
 
   async update(id: string, updateEventDto: UpdateEventDto): Promise<Event> {
     await this.findOne(id);
-    const updateData: any = { ...updateEventDto };
-    if (updateEventDto.date) {
-      updateData.date = new Date(updateEventDto.date);
-    }
-    if (updateEventDto.startTime) {
-      updateData.startTime = new Date(updateEventDto.startTime);
-    }
-    if (updateEventDto.endTime) {
-      updateData.endTime = new Date(updateEventDto.endTime);
-    }
+
     return this.prisma.event.update({
       where: { id },
-      data: updateData,
+      data: { ...updateEventDto },
     });
   }
 

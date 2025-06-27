@@ -16,13 +16,13 @@ export class CreateEventDto {
 
   @IsDateString()
   @IsNotEmpty()
-  date: string;
+  date: string | Date;
 
   @IsDateString()
   @IsNotEmpty()
-  startTime: string;
+  startTime: string | Date;
 
   @IsDateString()
   @IsNotEmpty()
-  endTime: string;
+  endTime: string | Date;
 }
