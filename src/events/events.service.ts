@@ -1,72 +1,33 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, Inject } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
+import { IEventRepository } from './repositories/event.repository.interface';
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject('IEventRepository')
+    private readonly eventRepository: IEventRepository,
+  ) {}
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
-    return this.prisma.event.create({
-      data: {
-        ...createEventDto,
-        date: new Date(createEventDto.date),
-        startTime: new Date(createEventDto.startTime),
-        endTime: new Date(createEventDto.endTime),
-      },
-    });
+    return this.eventRepository.create(createEventDto);
   }
 
   async findAll(): Promise<Event[]> {
-    return this.prisma.event.findMany({
-      orderBy: {
-        startTime: 'asc',
-      },
-    });
+    return this.eventRepository.findAll();
   }
 
   async findOne(id: string): Promise<Event> {
-    const event = await this.prisma.event.findUnique({
-      where: { id },
-    });
-
-    if (!event) {
-      throw new NotFoundException(`Event with ID ${id} not found`);
-    }
-
-    return event;
+    return this.eventRepository.findOne(id);
   }
 
   async update(id: string, updateEventDto: UpdateEventDto): Promise<Event> {
-    await this.findOne(id);
-
-    const updateData: any = { ...updateEventDto };
-
-    if (updateEventDto.date) {
-      updateData.date = new Date(updateEventDto.date);
-    }
-
-    if (updateEventDto.startTime) {
-      updateData.startTime = new Date(updateEventDto.startTime);
-    }
-
-    if (updateEventDto.endTime) {
-      updateData.endTime = new Date(updateEventDto.endTime);
-    }
-
-    return this.prisma.event.update({
-      where: { id },
-      data: updateData,
-    });
+    return this.eventRepository.update(id, updateEventDto);
   }
 
   async remove(id: string): Promise<Event> {
-    await this.findOne(id);
-
-    return this.prisma.event.delete({
-      where: { id },
-    });
+    return this.eventRepository.remove(id);
   }
 }
