@@ -3,9 +3,10 @@ import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EventRepository } from './repositories/event.repository';
+import { GoogleModule } from '../google/google.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, GoogleModule],
   controllers: [EventsController],
   providers: [
     EventsService,
