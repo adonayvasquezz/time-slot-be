@@ -3,6 +3,7 @@ import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EventRepository } from './repositories/event.repository';
+import { UserRepository } from './repositories/user.repository';
 import { GoogleModule } from '../google/google.module';
 
 @Module({
@@ -11,6 +12,7 @@ import { GoogleModule } from '../google/google.module';
   providers: [
     EventsService,
     { provide: 'IEventRepository', useClass: EventRepository },
+    { provide: 'IUserRepository', useClass: UserRepository },
   ],
   exports: [EventsService],
 })

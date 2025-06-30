@@ -2,7 +2,9 @@ import { Injectable, Inject } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
+import { User } from './entities/user.entity';
 import { IEventRepository } from './repositories/event.repository.interface';
+import { IUserRepository } from './repositories/user.repository.interface';
 import { GoogleCalendarService } from '../google/google-calendar.service';
 
 @Injectable()
@@ -10,14 +12,29 @@ export class EventsService {
   constructor(
     @Inject('IEventRepository')
     private readonly eventRepository: IEventRepository,
+    @Inject('IUserRepository')
+    private readonly userRepository: IUserRepository,
     private readonly googleCalendarService: GoogleCalendarService,
   ) {}
 
   async create(
     createEventDto: CreateEventDto,
-    idpToken?: string,
+    externalId: string,
+    idpToken: string,
   ): Promise<Event> {
-    const event = await this.eventRepository.create(createEventDto);
+    let user = await this.userRepository.findByExternalId(externalId);
+    if (!user) {
+      throw new Error(`User does not exist`);
+    }
+
+    await this.userRepository.update(user.id, {
+      idpToken,
+    });
+
+    const event = await this.eventRepository.create({
+      ...createEventDto,
+      userId: user.id,
+    });
 
     if (idpToken) {
       try {
@@ -39,8 +56,15 @@ export class EventsService {
     return event;
   }
 
-  async findAll(): Promise<Event[]> {
-    return this.eventRepository.findAll();
+  async findAll(externalUserId: string): Promise<Event[]> {
+    const user = await this.userRepository.findByExternalId(externalUserId);
+    if (!user) {
+      await this.userRepository.create({
+        externalId: externalUserId,
+      });
+      return [];
+    }
+    return this.eventRepository.findAllByUserId(user.id);
   }
 
   async findOne(id: string): Promise<Event> {

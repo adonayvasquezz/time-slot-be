@@ -23,6 +23,15 @@ export class EventRepository implements IEventRepository {
     });
   }
 
+  async findAllByUserId(userId: string): Promise<Event[]> {
+    return this.prisma.event.findMany({
+      where: { userId },
+      orderBy: {
+        startTime: 'asc',
+      },
+    });
+  }
+
   async findOne(id: string): Promise<Event> {
     const event = await this.prisma.event.findUnique({
       where: { id },

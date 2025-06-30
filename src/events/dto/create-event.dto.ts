@@ -25,4 +25,8 @@ export class CreateEventDto {
   @IsDateString()
   @IsNotEmpty()
   endTime: string | Date;
+
+  @IsString()
+  @IsOptional()
+  userId: string;
 }
