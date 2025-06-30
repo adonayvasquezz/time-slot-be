@@ -23,276 +23,292 @@
 
 # Time Slot Backend
 
-A NestJS-based backend application for managing time slots with PostgreSQL database and Prisma ORM.
+A NestJS-based backend application for managing time slots with PostgreSQL database, Prisma ORM, Auth0 authentication, and Google Calendar integration.
 
-## Prerequisites
+## 🚀 Quick Start
 
-Before running this project, ensure you have the following installed on your machine:
+### Prerequisites
 
-- **Node.js** (v20 or higher) - [Download here](https://nodejs.org/)
-- **Yarn** package manager - [Installation guide](https://yarnpkg.com/getting-started/install)
-- **Docker** and **Docker Compose** - [Download here](https://www.docker.com/products/docker-desktop/)
-- **Git** - [Download here](https://git-scm.com/)
+- Node.js (v20+)
+- Docker & Docker Compose
+- Git
 
-## Quick Start with Docker (Recommended)
-
-The easiest way to run this project is using Docker, which will set up everything automatically including the PostgreSQL database.
-
-### 1. Clone the repository
+### 1. Clone and Start
 
 ```bash
 git clone <repository-url>
 cd time-slot-be
-```
 
-### 2. Start the application with Docker Compose
-
-```bash
-# Start all services (database + application)
-yarn docker:compose:up
-
-# Or using npm
+# Start with Docker (recommended)
 npm run docker:compose:up
-```
 
-This command will:
-
-- Start a PostgreSQL database container
-- Build and start the NestJS application container
-- Set up the network between containers
-- Run on the following ports:
-  - **Application**: http://localhost:3000
-  - **Database**: localhost:5432
-  - **Prisma Studio** (optional): http://localhost:5555
-
-### 3. Run database migrations
-
-```bash
-# Generate Prisma client and run migrations
-yarn db:setup
-
-# Or using npm
+# Setup database
 npm run db:setup
 ```
 
-### 4. Verify the setup
+### 2. Access the Application
 
-- Check if containers are running: `docker ps`
-- View application logs: `yarn docker:compose:logs`
-- Access the API at: http://localhost:3000
+- **API**: http://localhost:3000
+- **Database**: localhost:5432
+- **Prisma Studio**: http://localhost:5555
 
-## Manual Setup (Without Docker)
+## 📋 Features
 
-If you prefer to run the project without Docker, follow these steps:
+### ✅ Core Features
 
-### 1. Clone and install dependencies
+- **Event Management**: CRUD operations for time slots
+- **User Management**: Auth0 integration with JWT authentication
+- **Conflict Detection**: Prevents overlapping events (local + Google Calendar)
+- **Google Calendar Sync**: Automatic synchronization with Google Calendar
+- **Database**: PostgreSQL with Prisma ORM
 
-```bash
-git clone <repository-url>
-cd time-slot-be
-yarn install
-```
+### ✅ Security
 
-### 2. Set up PostgreSQL database
+- Auth0 JWT authentication
+- User-specific event filtering
+- Secure token handling
 
-You'll need a PostgreSQL database running locally or remotely. Update the `DATABASE_URL` in your environment:
+### ✅ Integration
 
-```bash
-# Create a .env file
-echo "DATABASE_URL=postgresql://username:password@localhost:5432/timeslot_db" > .env
-```
+- Google Calendar API integration
+- Real-time conflict detection
+- Automatic event synchronization
 
-### 3. Set up the database
+## 🔧 Configuration
 
-```bash
-# Generate Prisma client
-yarn prisma:generate
+### Environment Variables
 
-# Run database migrations
-yarn prisma:migrate
-```
-
-### 4. Start the application
-
-```bash
-# Development mode
-yarn start:dev
-
-# Production mode
-yarn start:prod
-```
-
-## Available Scripts
-
-### Development Scripts
-
-```bash
-# Start the application
-yarn start                    # Production mode
-yarn start:dev               # Development mode with hot reload
-yarn start:debug             # Debug mode
-
-# Build the application
-yarn build
-
-# Run tests
-yarn test                    # Unit tests
-yarn test:e2e               # End-to-end tests
-yarn test:cov               # Test coverage
-
-# Code quality
-yarn lint                   # ESLint
-yarn format                 # Prettier formatting
-```
-
-### Database Scripts
-
-```bash
-# Prisma commands
-yarn prisma:generate        # Generate Prisma client
-yarn prisma:migrate         # Run migrations
-yarn prisma:studio          # Open Prisma Studio
-yarn prisma:db:push         # Push schema changes
-yarn prisma:db:seed         # Seed the database
-```
-
-### Docker Scripts
-
-```bash
-# Docker commands
-yarn docker:build           # Build Docker image
-yarn docker:run             # Run container
-yarn docker:compose:up      # Start all services
-yarn docker:compose:down    # Stop all services
-yarn docker:compose:logs    # View logs
-yarn docker:compose:studio  # Start Prisma Studio in Docker
-```
-
-## Project Structure
-
-```
-time-slot-be/
-├── src/                    # Application source code
-│   ├── app.controller.ts   # Main controller
-│   ├── app.service.ts      # Main service
-│   ├── app.module.ts       # Root module
-│   └── main.ts            # Application entry point
-├── prisma/                # Database schema and migrations
-│   └── schema.prisma      # Prisma schema
-├── test/                  # Test files
-├── Dockerfile             # Docker configuration
-├── docker-compose.yml     # Docker Compose services
-└── package.json           # Dependencies and scripts
-```
-
-## Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file:
 
 ```env
 # Database
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/timeslot_db
+
+# Auth0
+AUTH0_DOMAIN=your-tenant.auth0.com
+AUTH0_AUDIENCE=your-api-identifier
+AUTH0_ISSUER=https://your-tenant.auth0.com/
 
 # Application
 NODE_ENV=development
 PORT=3000
 ```
 
-## Database Configuration
+### Auth0 Setup
 
-The application uses PostgreSQL with the following default configuration:
+1. Create an Auth0 application
+2. Configure API with RS256 signing
+3. Set audience and issuer in environment variables
+4. Frontend sends JWT in `Authorization: Bearer <token>` header
 
-- **Host**: localhost (or `postgres` in Docker)
-- **Port**: 5432
-- **Database**: timeslot_db
-- **Username**: postgres
-- **Password**: postgres
+### Google Calendar Setup
 
-## Troubleshooting
+1. Enable Google Calendar API
+2. Configure OAuth2 credentials
+3. Frontend provides access token in `X-Google-Token` header
+4. Automatic sync on CRUD operations
+
+## 📡 API Endpoints
+
+### Events
+
+```bash
+GET    /events                    # List user events
+POST   /events                    # Create event
+GET    /events/:id                # Get specific event
+PATCH  /events/:id                # Update event
+DELETE /events/:id                # Delete event
+```
+
+### Google Calendar
+
+```bash
+GET    /events/google-calendar/list    # List Google Calendar events
+POST   /events/sync/google-calendar    # Sync all events
+```
+
+## 🔄 Event Conflict Detection
+
+The system prevents overlapping events by checking:
+
+1. **Local Database**: Events stored in PostgreSQL
+2. **Google Calendar**: Events in user's Google Calendar
+3. **Real-time Validation**: Before creating/updating events
+
+### Conflict Types Detected
+
+- Partial overlaps
+- Complete containment
+- Event wrapping
+
+### Error Response
+
+```json
+{
+  "statusCode": 409,
+  "message": "No se puede crear el evento porque colisiona con: Evento local, Event in Google Calendar: Meeting"
+}
+```
+
+## 🏗️ Project Structure
+
+```
+src/
+├── events/                 # Event management
+│   ├── controllers/        # API endpoints
+│   ├── services/          # Business logic
+│   ├── repositories/      # Data access
+│   └── entities/          # Data models
+├── google/                # Google Calendar integration
+├── common/                # Shared utilities
+└── prisma/               # Database configuration
+```
+
+## 🐳 Docker Commands
+
+```bash
+# Start all services
+npm run docker:compose:up
+
+# View logs
+npm run docker:compose:logs
+
+# Stop services
+npm run docker:compose:down
+
+# Prisma Studio
+npm run docker:compose:studio
+```
+
+## 📝 Available Scripts
+
+### Development
+
+```bash
+npm run start:dev          # Development mode
+npm run build              # Build application
+npm run test               # Run tests
+npm run lint               # Code linting
+```
+
+### Database
+
+```bash
+npm run prisma:generate    # Generate Prisma client
+npm run prisma:migrate     # Run migrations
+npm run prisma:studio      # Open Prisma Studio
+npm run db:setup           # Setup database
+```
+
+### Docker
+
+```bash
+npm run docker:build       # Build image
+npm run docker:compose:up  # Start services
+npm run docker:compose:down # Stop services
+```
+
+## 🔒 Authentication Flow
+
+1. **Frontend**: Obtains JWT from Auth0
+2. **API Request**: Sends JWT in `Authorization` header
+3. **Backend**: Validates JWT and extracts user info
+4. **User Context**: Events filtered by user ID
+5. **Google Token**: Optional `X-Google-Token` for Calendar sync
+
+## 🔄 Google Calendar Integration
+
+### Automatic Sync
+
+- **Create**: Event created locally → Created in Google Calendar
+- **Update**: Event updated locally → Updated in Google Calendar
+- **Delete**: Event deleted locally → Deleted from Google Calendar
+
+### Manual Sync
+
+```bash
+POST /events/sync/google-calendar
+Authorization: Bearer <google-access-token>
+```
+
+### Conflict Detection
+
+- Checks both local database and Google Calendar
+- Prevents creation of conflicting events
+- Provides detailed error messages
+
+## 🛠️ Development
+
+### Local Setup (without Docker)
+
+```bash
+# Install dependencies
+npm install
+
+# Setup database
+npm run prisma:generate
+npm run prisma:migrate
+
+# Start development server
+npm run start:dev
+```
+
+## 🚨 Troubleshooting
 
 ### Common Issues
 
-#### Port Conflicts
-
-If you get port conflicts, modify the ports in `docker-compose.yml`:
-
-- PostgreSQL: Change `5432:5432` to `5433:5432`
-- App: Change `3000:3000` to `3001:3000`
-- Prisma Studio: Change `5555:5555` to `5556:5555`
-
-#### Database Connection Issues
-
-1. Ensure PostgreSQL container is running: `docker ps`
-2. Check logs: `yarn docker:compose:logs`
-3. Verify DATABASE_URL in your `.env` file
-
-#### Docker Issues
+**Port Conflicts**
 
 ```bash
-# Reset everything
-yarn docker:compose:down
-docker volume rm time-slot-be_postgres_data
-yarn docker:compose:up
+# Modify docker-compose.yml ports
+PostgreSQL: 5433:5432
+App: 3001:3000
+Prisma Studio: 5556:5555
 ```
 
-### Useful Commands
+**Database Connection**
 
 ```bash
-# View running containers
+# Check containers
 docker ps
 
-# View logs for specific service
-docker-compose logs app
-docker-compose logs postgres
+# View logs
+npm run docker:compose:logs
 
-# Access database directly
-docker exec -it time-slot-postgres psql -U postgres -d timeslot_db
-
-# Restart services
-yarn docker:compose:restart
+# Reset database
+docker volume rm time-slot-be_postgres_data
+npm run docker:compose:up
 ```
 
-## Development Workflow
+**Auth0 Issues**
 
-1. **Start the development environment**:
+- Verify environment variables
+- Check JWT format: `Bearer <token>`
+- Ensure audience and issuer match Auth0 config
 
-   ```bash
-   yarn docker:compose:up
-   ```
+**Google Calendar Issues**
 
-2. **Make code changes** - The application will automatically reload in development mode
+- Verify access token permissions
+- Check token expiration
+- Ensure Google Calendar API is enabled
 
-3. **Run tests**:
+## 📊 Status
 
-   ```bash
-   yarn test
-   ```
+- ✅ **Production Ready**: All core features implemented
+- ✅ **Security**: Auth0 integration complete
+- ✅ **Integration**: Google Calendar sync working
+- ✅ **Conflict Detection**: Local + Google Calendar validation
+- ✅ **Documentation**: Complete setup and usage guides
 
-4. **Update database schema**:
+## 🤝 Contributing
 
-   ```bash
-   # After modifying prisma/schema.prisma
-   yarn prisma:generate
-   yarn prisma:migrate
-   ```
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Run tests: `npm test`
+5. Submit pull request
 
-5. **View database** (optional):
-   ```bash
-   yarn docker:compose:studio
-   # Then visit http://localhost:5555
-   ```
-
-## Deployment
-
-For production deployment, the project includes a multi-stage Dockerfile optimized for production builds. See the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-## Support
-
-- **Documentation**: [NestJS Documentation](https://docs.nestjs.com)
-- **Discord**: [NestJS Discord](https://discord.gg/G7Qnnhy)
-- **Issues**: Create an issue in the project repository
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License.
 
