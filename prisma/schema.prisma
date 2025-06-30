@@ -22,8 +22,25 @@ model Event {
   startTime             DateTime
   endTime               DateTime
   googleCalendarEventId String?
+  userId                String
+  user                  User     @relation("UserEvents", fields: [userId], references: [id])
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
   @@map("events")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  externalId  String   @unique
+  email       String   @unique
+  name        String?
+  picture     String?
+  events      Event[]  @relation("UserEvents")
+  idpToken    String?
+  idpTokenExpiresAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("users")
 }
