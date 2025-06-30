@@ -18,7 +18,7 @@ export class EventRepository implements IEventRepository {
   async findAll(): Promise<Event[]> {
     return this.prisma.event.findMany({
       orderBy: {
-        startTime: 'asc',
+        date: 'asc',
       },
     });
   }
@@ -27,7 +27,7 @@ export class EventRepository implements IEventRepository {
     return this.prisma.event.findMany({
       where: { userId },
       orderBy: {
-        startTime: 'asc',
+        date: 'asc',
       },
     });
   }
@@ -55,6 +55,39 @@ export class EventRepository implements IEventRepository {
     await this.findOne(id);
     return this.prisma.event.delete({
       where: { id },
+    });
+  }
+
+  async findConflictingEvents(
+    startTime: Date,
+    endTime: Date,
+    excludeEventId?: string,
+  ): Promise<Event[]> {
+    const whereClause: any = {
+      OR: [
+        {
+          startTime: { lte: startTime },
+          endTime: { gt: startTime },
+        },
+        {
+          startTime: { gte: startTime, lt: endTime },
+        },
+        {
+          startTime: { lte: startTime },
+          endTime: { gte: endTime },
+        },
+      ],
+    };
+
+    if (excludeEventId) {
+      whereClause.id = { not: excludeEventId };
+    }
+
+    return this.prisma.event.findMany({
+      where: whereClause,
+      orderBy: {
+        startTime: 'asc',
+      },
     });
   }
 }

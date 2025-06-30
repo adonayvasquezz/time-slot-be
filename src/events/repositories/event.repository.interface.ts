@@ -9,4 +9,9 @@ export interface IEventRepository {
   findOne(id: string): Promise<Event>;
   update(id: string, updateEventDto: UpdateEventDto): Promise<Event>;
   remove(id: string): Promise<Event>;
+  findConflictingEvents(
+    startTime: Date,
+    endTime: Date,
+    excludeEventId?: string,
+  ): Promise<Event[]>;
 }

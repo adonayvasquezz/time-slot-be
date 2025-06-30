@@ -2,10 +2,10 @@ import { Injectable, Inject } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
-import { User } from './entities/user.entity';
 import { IEventRepository } from './repositories/event.repository.interface';
 import { IUserRepository } from './repositories/user.repository.interface';
 import { GoogleCalendarService } from '../google/google-calendar.service';
+import { EventConflictException } from './exceptions/event-conflict.exception';
 
 @Injectable()
 export class EventsService {
@@ -25,6 +25,15 @@ export class EventsService {
     let user = await this.userRepository.findByExternalId(externalId);
     if (!user) {
       throw new Error(`User does not exist`);
+    }
+
+    const conflictingEvents = await this.eventRepository.findConflictingEvents(
+      new Date(createEventDto.startTime),
+      new Date(createEventDto.endTime),
+    );
+
+    if (conflictingEvents.length > 0) {
+      throw new EventConflictException(conflictingEvents);
     }
 
     await this.userRepository.update(user.id, {
@@ -76,6 +85,19 @@ export class EventsService {
     updateEventDto: UpdateEventDto,
     idpToken?: string,
   ): Promise<Event> {
+    if (updateEventDto.startTime && updateEventDto.endTime) {
+      const conflictingEvents =
+        await this.eventRepository.findConflictingEvents(
+          new Date(updateEventDto.startTime),
+          new Date(updateEventDto.endTime),
+          id,
+        );
+
+      if (conflictingEvents.length > 0) {
+        throw new EventConflictException(conflictingEvents);
+      }
+    }
+
     const event = await this.eventRepository.update(id, updateEventDto);
 
     if (idpToken && event.googleCalendarEventId) {
