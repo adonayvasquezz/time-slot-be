@@ -33,7 +33,7 @@ model Event {
 model User {
   id          String   @id @default(cuid())
   externalId  String   @unique
-  email       String   @unique
+  email       String?   
   name        String?
   picture     String?
   events      Event[]  @relation("UserEvents")
