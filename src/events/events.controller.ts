@@ -65,9 +65,9 @@ export class EventsController {
   @Get()
   findAll(@Req() req: Request) {
     const accessToken = this.extractAccessToken(req);
-    const userInfo = this.extractUserIdFromToken(accessToken);
+    const externalUserId = this.extractUserIdFromToken(accessToken);
 
-    return this.eventsService.findAll(userInfo);
+    return this.eventsService.findAll(externalUserId);
   }
 
   @Get(':id')

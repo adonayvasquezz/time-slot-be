@@ -92,7 +92,7 @@ export class EventsService {
     return event;
   }
 
-  async remove(id: string, idpToken?: string): Promise<Event> {
+  async remove(id: string, idpToken: string): Promise<Event> {
     const event = await this.eventRepository.findOne(id);
 
     if (idpToken && event.googleCalendarEventId) {
