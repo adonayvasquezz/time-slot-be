@@ -127,6 +127,27 @@ GET    /events/google-calendar/list    # List Google Calendar events
 POST   /events/sync/google-calendar    # Sync all events
 ```
 
+## 📚 API Documentation
+
+The API is fully documented with Swagger/OpenAPI. Access the interactive documentation at:
+
+**Swagger UI**: http://localhost:3000/api/docs
+
+### Features
+
+- ✅ **Interactive Documentation**: Test endpoints directly from the browser
+- ✅ **Request/Response Examples**: See exact data structures
+- ✅ **Authentication**: Bearer token support with "Authorize" button
+- ✅ **Error Responses**: All possible error codes documented
+- ✅ **Models**: Complete Event and DTO schemas
+
+### Usage
+
+1. Start the application: `npm run docker:compose:up`
+2. Open: http://localhost:3000/api/docs
+3. Click "Authorize" to add your Bearer token
+4. Test any endpoint directly from the UI
+
 ## 🔄 Event Conflict Detection
 
 The system prevents overlapping events by checking:
