@@ -36,6 +36,28 @@ export class EventsService {
       throw new EventConflictException(conflictingEvents);
     }
 
+    if (idpToken) {
+      const googleConflictingEvents =
+        await this.googleCalendarService.checkConflictingEvents(
+          idpToken,
+          new Date(createEventDto.startTime).toISOString(),
+          new Date(createEventDto.endTime).toISOString(),
+        );
+
+      if (googleConflictingEvents.length > 0) {
+        const eventTitles = googleConflictingEvents
+          .map((event) => event.summary || 'Event without title')
+          .join(', ');
+        throw new EventConflictException([
+          {
+            title: `Event in Google Calendar: ${eventTitles}`,
+            startTime: createEventDto.startTime,
+            endTime: createEventDto.endTime,
+          },
+        ]);
+      }
+    }
+
     await this.userRepository.update(user.id, {
       idpToken,
     });
@@ -95,6 +117,30 @@ export class EventsService {
 
       if (conflictingEvents.length > 0) {
         throw new EventConflictException(conflictingEvents);
+      }
+
+      if (idpToken) {
+        const event = await this.eventRepository.findOne(id);
+        const googleConflictingEvents =
+          await this.googleCalendarService.checkConflictingEvents(
+            idpToken,
+            new Date(updateEventDto.startTime).toISOString(),
+            new Date(updateEventDto.endTime).toISOString(),
+            event.googleCalendarEventId || undefined,
+          );
+
+        if (googleConflictingEvents.length > 0) {
+          const eventTitles = googleConflictingEvents
+            .map((event) => event.summary || 'Event without title')
+            .join(', ');
+          throw new EventConflictException([
+            {
+              title: `Event in google calendar: ${eventTitles}`,
+              startTime: updateEventDto.startTime,
+              endTime: updateEventDto.endTime,
+            },
+          ]);
+        }
       }
     }
 

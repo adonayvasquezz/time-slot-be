@@ -161,4 +161,58 @@ export class GoogleCalendarService {
       return this.createEvent(accessToken, googleEvent);
     }
   }
+
+  async checkConflictingEvents(
+    accessToken: string,
+    startTime: string,
+    endTime: string,
+    excludeEventId?: string,
+  ): Promise<any[]> {
+    try {
+      const calendar = this.getCalendarClient(accessToken);
+
+      const response = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin: startTime,
+        timeMax: endTime,
+        singleEvents: true,
+        orderBy: 'startTime',
+      });
+
+      const events = response.data.items || [];
+
+      const conflictingEvents = events.filter((event) => {
+        if (excludeEventId && event.id === excludeEventId) {
+          return false;
+        }
+
+        if (!event.start || !event.end) {
+          return false;
+        }
+
+        const eventStart = new Date(
+          event.start.dateTime || event.start.date || '',
+        );
+        const eventEnd = new Date(event.end.dateTime || event.end.date || '');
+        const newStart = new Date(startTime);
+        const newEnd = new Date(endTime);
+
+        if (isNaN(eventStart.getTime()) || isNaN(eventEnd.getTime())) {
+          return false;
+        }
+
+        return (
+          (eventStart < newEnd && eventEnd > newStart) ||
+          (eventStart >= newStart && eventStart < newEnd) ||
+          (eventStart <= newStart && eventEnd >= newEnd)
+        );
+      });
+
+      return conflictingEvents;
+    } catch (error) {
+      console.error('Error checking Google Calendar conflicts:', error);
+
+      return [];
+    }
+  }
 }
